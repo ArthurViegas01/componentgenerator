@@ -42,7 +42,13 @@ export async function formatCode(
       printWidth: 80,
       tabWidth: 2,
     });
-  } catch {
+  } catch (err) {
+    // Prettier falhou (ex: código com erro de sintaxe ou problema de bundle).
+    // Retorna a fonte inalterada para não perder o conteúdo do editor.
+    console.warn(
+      "[formatCode] Prettier failed — returning unmodified source.",
+      err instanceof Error ? err.message : err
+    );
     return source;
   }
 }

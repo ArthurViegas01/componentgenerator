@@ -12,7 +12,22 @@ const nextConfig = {
   turbopack: {},
   // Ainda mantemos a config webpack para `next build` (produção continua no
   // webpack até você passar --turbopack no build também).
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
+    // Prettier/standalone é projetado para rodar no browser, mas o webpack
+    // pode tentar resolver módulos Node.js (fs, path, os) que ele referencia
+    // indiretamente. Estas entradas dizem ao webpack para ignorá-los no
+    // bundle do client — o código de runtime nunca chega a importá-los.
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        os: false,
+        crypto: false,
+        stream: false,
+        buffer: false,
+      };
+    }
     config.module.rules.push({
       test: /\.ttf$/,
       type: "asset/resource",

@@ -28,6 +28,7 @@ export function CodeEditor() {
   const warnings = useEditorStore((s) => s.warnings);
   const mode = useThemeStore((s) => s.mode);
   const [copied, setCopied] = useState(false);
+  const [formatting, setFormatting] = useState(false);
 
   const meta = useMemo(() => extractProps(code), [code]);
   const filename = useMemo(
@@ -46,9 +47,15 @@ export function CodeEditor() {
   }, [code]);
 
   const onFormat = useCallback(async () => {
-    const formatted = await formatCode(code);
-    setCode(formatted);
-  }, [code, setCode]);
+    if (formatting) return;
+    setFormatting(true);
+    try {
+      const formatted = await formatCode(code);
+      setCode(formatted);
+    } finally {
+      setFormatting(false);
+    }
+  }, [code, setCode, formatting]);
 
   const onDownload = useCallback(() => {
     const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
@@ -134,9 +141,16 @@ export function CodeEditor() {
             variant="ghost"
             size="sm"
             onClick={onFormat}
-            leftIcon={<Wand2 className="h-3.5 w-3.5" />}
+            disabled={formatting}
+            leftIcon={
+              formatting ? (
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              ) : (
+                <Wand2 className="h-3.5 w-3.5" />
+              )
+            }
           >
-            Format
+            {formatting ? "Formatting…" : "Format"}
           </Button>
           <Button
             variant="ghost"

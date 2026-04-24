@@ -1,0 +1,15 @@
+# =====================================================================
+# Netlify configuration for UI Component Generator (Next.js)
+# =====================================================================
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# The Next.js plugin converts API routes to Netlify Functions and
+# enables streaming responses, SSR, and ISR on Netlify's platform.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
