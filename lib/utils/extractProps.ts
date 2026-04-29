@@ -14,19 +14,33 @@ export interface ExtractedMeta {
 const COMPONENT_NAME_REGEX =
   /(?:export\s+(?:default\s+)?function|const)\s+([A-Z][A-Za-z0-9_]*)/;
 
-const PROPS_INTERFACE_REGEX =
-  /(?:interface|type)\s+\w*Props\w*\s*=?\s*\{([^}]*)\}/;
+const PROPS_INTERFACE_START_REGEX =
+  /(?:interface|type)\s+\w*Props\w*\s*=?\s*\{/;
 
-const PROP_LINE_REGEX = /^\s*([a-zA-Z_$][\w$]*)(\?)?:\s*([^;,\n]+)[;,]?\s*$/gm;
+const PROP_LINE_REGEX = /^\s*([a-zA-Z_$][\w$]*)(\?)?:\s*(.+?)[;,]?\s*$/gm;
+
+function extractInterfaceBody(source: string): string | null {
+  const match = PROPS_INTERFACE_START_REGEX.exec(source);
+  if (!match) return null;
+  let depth = 1;
+  let i = match.index + match[0].length;
+  const start = i;
+  while (i < source.length && depth > 0) {
+    if (source[i] === "{") depth++;
+    else if (source[i] === "}") depth--;
+    i++;
+  }
+  return depth === 0 ? source.slice(start, i - 1) : null;
+}
 
 export function extractProps(source: string): ExtractedMeta {
   const nameMatch = source.match(COMPONENT_NAME_REGEX);
-  const propsBlockMatch = source.match(PROPS_INTERFACE_REGEX);
+  const interfaceBody = extractInterfaceBody(source);
   const hasDefaultExport = /export\s+default/.test(source);
 
   const props: ExtractedMeta["props"] = [];
-  if (propsBlockMatch) {
-    const body = propsBlockMatch[1];
+  if (interfaceBody) {
+    const body = interfaceBody;
     for (const match of body.matchAll(PROP_LINE_REGEX)) {
       props.push({
         name: match[1],

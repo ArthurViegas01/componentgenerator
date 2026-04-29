@@ -89,11 +89,26 @@ function mockValueSource(rawType: string, propName: string): string {
     case "any":
     case "unknown":
       return JSON.stringify(sampleStringFor(propName));
-    default:
-      // Object-ish / unknown — pass an empty object so property access
-      // doesn't crash. Consumers that need specific fields will produce
-      // undefined, but that's less common than array/string prop crashes.
+    default: {
+      // Inline object type like `{ label: string; href: string }` — parse
+      // its fields recursively so consumers don't see empty objects.
+      const inlineMatch = type.match(/^\{([^}]+)\}$/);
+      if (inlineMatch) {
+        const fieldSrc = inlineMatch[1]
+          .split(/[;,]/)
+          .map((f) => f.trim())
+          .filter(Boolean)
+          .map((f) => {
+            const m = f.match(/^([a-zA-Z_$][\w$]*)(?:\?)?:\s*(.+)$/);
+            if (!m) return null;
+            return `${JSON.stringify(m[1])}: ${mockValueSource(m[2].trim(), m[1])}`;
+          })
+          .filter(Boolean)
+          .join(", ");
+        return `{ ${fieldSrc} }`;
+      }
       return "{}";
+    }
   }
 }
 
