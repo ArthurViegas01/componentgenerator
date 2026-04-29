@@ -275,6 +275,7 @@ function buildSandboxHtml(args: {
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://unpkg.com/framer-motion@11/dist/framer-motion.js" crossorigin></script>
+<script src="https://unpkg.com/lucide-react@0.453.0/dist/umd/lucide-react.js" crossorigin></script>
 <style>
   html, body { margin: 0; padding: 0; }
   html { background: #ffffff; color: #09090b; }
@@ -296,19 +297,41 @@ try {
   }});
   const AnimatePresence = framerMotion.AnimatePresence || (({ children }) => children);
 
-  // Minimal lucide-react fallback — renders a bordered square in place of
-  // real icons so the layout doesn't break when the CDN is slow / blocked.
-  const iconStub = (name) => React.forwardRef((props, ref) =>
-    React.createElement('span', {
+  // Icon stub used when lucide-react CDN hasn't loaded yet or fails.
+  // Renders a proper SVG (circle with dot) so the layout looks clean even
+  // in the fallback case — much better than a bordered square.
+  const iconStub = (name) => React.forwardRef(({ size = 16, className, color, strokeWidth = 2, ...rest }, ref) =>
+    React.createElement('svg', {
       ref,
-      title: name,
-      'aria-hidden': true,
-      ...props,
-      className: ['inline-block align-middle rounded-sm bg-current/20 ring-1 ring-current/40', props.className].filter(Boolean).join(' '),
-      style: { width: props.size || 16, height: props.size || 16, ...(props.style || {}) },
-    })
+      xmlns: 'http://www.w3.org/2000/svg',
+      width: size,
+      height: size,
+      viewBox: '0 0 24 24',
+      fill: 'none',
+      stroke: color || 'currentColor',
+      strokeWidth,
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+      className: ['inline-block align-middle', className].filter(Boolean).join(' '),
+      'aria-label': name,
+      ...rest,
+    },
+      React.createElement('circle', { key: 'c', cx: 12, cy: 12, r: 9 }),
+      React.createElement('line', { key: 'l', x1: 12, y1: 8, x2: 12, y2: 13 }),
+      React.createElement('circle', { key: 'd', cx: 12, cy: 16.5, r: 0.75, fill: 'currentColor', stroke: 'none' }),
+    )
   );
-  const lucide = new Proxy({}, { get: (_t, name) => iconStub(String(name)) });
+
+  // Use the CDN-loaded lucide-react if available, fall back to the stub.
+  // This means real icons render in the preview once the script loads.
+  const lucideLib = window.LucideReact || null;
+  const lucide = new Proxy({}, {
+    get(_t, name) {
+      if (typeof name !== 'string') return undefined;
+      if (lucideLib && name in lucideLib) return lucideLib[name];
+      return iconStub(name);
+    }
+  });
 
   const cn = (...args) => args.flat(Infinity).filter(Boolean).join(' ');
 

@@ -15,25 +15,34 @@ STRICT RULES:
 1. Output **only** a fenced code block starting with \`\`\`tsx and ending with \`\`\`.
    No prose before, no prose after. No explanations.
 2. Use TypeScript (.tsx). Export the component as \`export default\`.
-3. Styling: Tailwind CSS utility classes ONLY. Never use inline \`style\`
+3. Language: write ALL code in English — variable names, prop names, comments,
+   JSDoc, and \`@example\` blocks. The user's prompt may be in any language;
+   always respond with English-language code.
+4. Styling: Tailwind CSS utility classes ONLY. Never use inline \`style\`
    objects, never use CSS modules, never use styled-components.
-4. Make the component reusable: all variable content must come from props.
+   Exception: SVG data-visualisation attributes (e.g. sparkline \`points\`,
+   \`d\`, computed \`x\`/\`y\`/\`width\` derived from array data) may use JSX
+   expressions since Tailwind has no equivalent — keep them inside the SVG only.
+5. Make the component reusable: all variable content must come from props.
    Define a \`Props\` interface with JSDoc comments on each field.
-5. Respect accessibility:
+   Type array-of-object props as inline object shapes:
+   \`links: { label: string; href: string }[]\` (never a named external type,
+   since the file must be self-contained).
+6. Respect accessibility:
    - semantic HTML (\`button\`, \`nav\`, \`article\`, \`section\`, \`label\` ...)
    - ARIA attributes where they add value
    - keyboard support for interactive elements
-6. Support dark mode via Tailwind's \`dark:\` variant.
-7. When animation/interaction is requested, use \`framer-motion\`'s \`motion.*\`
+7. Support dark mode via Tailwind's \`dark:\` variant.
+8. When animation/interaction is requested, use \`framer-motion\`'s \`motion.*\`
    components. Import from "framer-motion".
-8. When icons are needed, import from "lucide-react".
-9. Use Shadcn-style composition (compound components, \`className\` override
-   via a \`cn\` helper) when it makes the API cleaner. Assume \`cn\` is
-   imported from "@/lib/utils/cn".
-10. Add a JSDoc block above the component describing what it does and one
-    \`@example\` showing typical usage.
-11. Keep variable names descriptive. No \`data\`, \`item\`, \`x\`.
-12. The file must be self-contained: no external component imports beyond
+9. When icons are needed, import from "lucide-react".
+10. Use Shadcn-style composition (compound components, \`className\` override
+    via a \`cn\` helper) when it makes the API cleaner. Assume \`cn\` is
+    imported from "@/lib/utils/cn".
+11. Add a JSDoc block above the component describing what it does and one
+    \`@example\` showing typical usage (in English).
+12. Keep variable names descriptive. No \`data\`, \`item\`, \`x\`.
+13. The file must be self-contained: no external component imports beyond
     "react", "framer-motion", "lucide-react", and "@/lib/utils/cn".
 
 If the user description is ambiguous, pick sensible defaults silently — do
@@ -86,18 +95,18 @@ export const EXAMPLE_PROMPTS: Array<{ label: string; prompt: string; tag: string
     label: "Toast notification",
     tag: "feedback",
     prompt:
-      "Toast de notificação que desliza pela direita. 4 variantes: success, error, warning, info. Botão de fechar, auto-dismiss em 5s com barra de progresso.",
+      "Toast notification that slides in from the right. 4 variants: success, error, warning, info. Close button, auto-dismiss in 5s with a progress bar.",
   },
   {
     label: "Stat card",
     tag: "card",
     prompt:
-      "Card de estatística mostrando um número grande, rótulo, variação percentual (positiva/negativa com cor e ícone) e um mini sparkline.",
+      "Statistics card showing a large number, label, percentage variation (positive/negative with color and icon) and a mini sparkline.",
   },
   {
     label: "Hero section",
     tag: "section",
     prompt:
-      "Hero section para landing page SaaS: headline grande, subheadline, dois botões de CTA, badge de 'new', e uma imagem de produto à direita com sombra suave.",
+      "SaaS landing page hero: large headline, subheadline, two CTA buttons, a new badge, and a product image on the right with a soft shadow.",
   },
 ];
