@@ -42,6 +42,12 @@ export function PromptInput() {
       <Textarea
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
+        onKeyDown={(e) => {
+          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+            e.preventDefault();
+            if (!isStreaming && prompt.trim()) run(prompt);
+          }
+        }}
         placeholder='e.g. "Card with image, title, description, and button. Hover raises the card and deepens the shadow."'
         rows={6}
         className="min-h-[140px] flex-shrink-0"
@@ -72,6 +78,9 @@ export function PromptInput() {
             className="flex-1"
           >
             {status === "streaming" ? "Generating…" : "Generate"}
+            {status !== "streaming" && (
+              <span className="ml-1 hidden text-[10px] opacity-50 lg:inline">⌘↵</span>
+            )}
           </Button>
         )}
       </div>

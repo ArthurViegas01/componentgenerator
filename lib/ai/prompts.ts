@@ -77,19 +77,19 @@ export const EXAMPLE_PROMPTS: Array<{ label: string; prompt: string; tag: string
     label: "Pricing card",
     tag: "card",
     prompt:
-      "Pricing card com título, preço grande, lista de 4-5 features com ícones de check, e um botão de CTA. Variante 'popular' com badge e borda destacada.",
+      "Pricing card with a title, large price, a list of 4–5 features with check icons, and a CTA button. Include a 'Popular' variant with a badge and a highlighted border.",
   },
   {
     label: "Login form",
     tag: "form",
     prompt:
-      "Formulário de login com campos email e senha, label flutuante, validação inline, botão de submit com estado de loading e link 'esqueci minha senha'.",
+      "Login form with email and password fields, floating labels, inline validation, a submit button with a loading state, and a 'Forgot password?' link.",
   },
   {
     label: "Navbar",
     tag: "navigation",
     prompt:
-      "Navbar responsivo com logo à esquerda, links centrais, botão de ação à direita. Menu hamburguer em mobile com transição suave.",
+      "Responsive navbar with a logo on the left, centered navigation links, and an action button on the right. Mobile hamburger menu with a smooth open/close transition.",
   },
   {
     label: "Toast notification",
@@ -107,6 +107,6 @@ export const EXAMPLE_PROMPTS: Array<{ label: string; prompt: string; tag: string
     label: "Hero section",
     tag: "section",
     prompt:
-      "SaaS landing page hero: large headline, subheadline, two CTA buttons, a new badge, and a product image on the right with a soft shadow.",
+      "SaaS landing page hero: large headline, subheadline, two CTA buttons, a 'New' badge, and a product screenshot on the right with a soft glow shadow.",
   },
 ];

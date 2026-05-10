@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-/** Sign-up stub — mirrors `signin/page.tsx`. See that file's comment. */
+/** Sign-up page — authentication is on the roadmap. */
 export default function SignUpPage() {
   return (
     <main className="flex min-h-screen items-center justify-center p-6">
@@ -19,7 +19,8 @@ export default function SignUpPage() {
         <CardHeader>
           <CardTitle>Create account</CardTitle>
           <CardDescription>
-            Free tier: 10 generations per day. No card required.
+            Accounts are coming soon. The generator is free to use right now —
+            no sign-up required.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -37,22 +38,16 @@ export default function SignUpPage() {
             <span className="h-px flex-1 bg-border" />
           </div>
           <form className="space-y-2">
-            <Input placeholder="Full name" required />
-            <Input type="email" placeholder="you@work.com" required />
+            <Input placeholder="Full name" required disabled />
+            <Input type="email" placeholder="you@work.com" required disabled />
             <Button variant="primary" className="w-full" disabled>
               Create account
             </Button>
           </form>
-          <p className="text-center text-[11px] text-muted-foreground">
-            Auth is stubbed in this build — wire up NextAuth to enable it.
-          </p>
         </CardContent>
-        <CardFooter className="justify-between text-xs">
-          <Link href="/" className="text-muted-foreground hover:text-foreground">
-            ← Home
-          </Link>
-          <Link href="/auth/signin" className="text-primary hover:underline">
-            Sign in instead
+        <CardFooter className="justify-center text-xs">
+          <Link href="/generator" className="text-primary hover:underline">
+            Go to the generator →
           </Link>
         </CardFooter>
       </Card>

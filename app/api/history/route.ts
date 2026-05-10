@@ -3,15 +3,10 @@ import { NextResponse } from "next/server";
 /**
  * GET /api/history
  *
- * Stub — the canonical history lives in the browser's Zustand store today.
- * Returning an empty array keeps API consumers happy until server-side
- * persistence is added (Prisma + auth).
+ * Returns the user's saved component history. Currently a stub — history is
+ * stored client-side via Zustand. This route exists so clients don't need a
+ * feature flag; it will be backed by a database when multi-device sync is added.
  */
 export async function GET() {
-  return NextResponse.json({
-    ok: true,
-    components: [],
-    note:
-      "History is currently stored client-side via Zustand. Wire up a database here when adding multi-device sync.",
-  });
+  return NextResponse.json({ ok: true, components: [] });
 }

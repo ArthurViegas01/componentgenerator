@@ -3,15 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 /**
  * POST /api/save
  *
- * Stub endpoint — when a real backend is wired up (Prisma + Postgres or
- * similar), this route should:
- *   1. Validate the authenticated user (NextAuth session)
- *   2. Persist the component to the user's library
- *   3. Return the canonical record with a server-generated ID
- *
- * Today the client persists via Zustand + localStorage, so this route just
- * acknowledges the payload. Keeping the route present so the client code
- * doesn't need a feature flag.
+ * Persists a component to the user's library. Currently a stub — the client
+ * handles persistence via Zustand + localStorage. This route exists so the
+ * client doesn't need a feature flag; it will forward to a database layer
+ * (Prisma + auth) when server-side persistence is added.
  */
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -22,10 +17,5 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // TODO(server-persistence): forward to your DB layer.
-  return NextResponse.json({
-    ok: true,
-    persisted: false,
-    note: "Saved client-side only. Server persistence is not yet wired up.",
-  });
+  return NextResponse.json({ ok: true, persisted: false });
 }
