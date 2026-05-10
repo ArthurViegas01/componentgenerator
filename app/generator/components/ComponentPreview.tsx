@@ -277,7 +277,9 @@ function buildSandboxHtml(args: {
 <script src="https://unpkg.com/framer-motion@11/dist/framer-motion.js" crossorigin></script>
 <script src="https://unpkg.com/lucide-react@0.453.0/dist/umd/lucide-react.js" crossorigin></script>
 <style>
-  html, body { margin: 0; padding: 0; background: transparent; }
+  html, body { margin: 0; padding: 0; }
+  html { background: #ffffff; color: #09090b; }
+  html.dark { background: #09090b; color: #fafafa; }
   body { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; padding: 1rem; }
 </style>
 </head>
@@ -407,7 +409,8 @@ try {
     get(target, key) {
       if (key in target) return target[key];
       if (typeof key === 'symbol') return undefined;
-      return undefined;
+      // Unknown prop: return [] so .map()/.length don't crash on array props.
+      return [];
     },
   });
 

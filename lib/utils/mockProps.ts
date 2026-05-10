@@ -93,10 +93,26 @@ function mockValueSource(rawType: string, propName: string): string {
     case "any":
     case "unknown":
       return JSON.stringify(sampleStringFor(propName));
-    default:
-      // Unknown object-like type -- return an empty object so property reads
-      // return undefined rather than crashing with "Cannot read properties of null".
+    default: {
+      // Inline object type like `{ label: string; href: string }` — parse
+      // its fields recursively so consumers don't see empty objects.
+      const inlineMatch = type.match(/^\{([^}]+)\}$/);
+      if (inlineMatch) {
+        const fieldSrc = inlineMatch[1]
+          .split(/[;,]/)
+          .map((f) => f.trim())
+          .filter(Boolean)
+          .map((f) => {
+            const m = f.match(/^([a-zA-Z_$][\w$]*)(?:\?)?:\s*(.+)$/);
+            if (!m) return null;
+            return `${JSON.stringify(m[1])}: ${mockValueSource(m[2].trim(), m[1])}`;
+          })
+          .filter(Boolean)
+          .join(", ");
+        return `{ ${fieldSrc} }`;
+      }
       return "{}";
+    }
   }
 }
 
