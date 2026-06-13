@@ -2,16 +2,17 @@ import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { z } from "zod";
 import { SYSTEM_PROMPT, buildUserMessage } from "@/lib/ai/prompts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-interface GenerateBody {
-  prompt: string;
-  themeHint?: string;
-  extraGuidance?: string;
-}
+const GenerateBodySchema = z.object({
+  prompt: z.string().trim().min(1).max(4000),
+  themeHint: z.string().max(500).optional(),
+  extraGuidance: z.string().max(500).optional(),
+});
 
 // M1: Only accept requests from the app's own origin.
 // Requests without Origin (curl/server-to-server) are allowed and covered by rate limiting.
@@ -87,22 +88,24 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  let body: GenerateBody;
+  let rawBody: unknown;
   try {
-    body = await req.json();
+    rawBody = await req.json();
   } catch {
     return new Response("Invalid JSON body", { status: 400 });
   }
 
-  const prompt = body.prompt?.trim();
-  if (!prompt) {
-    return new Response("`prompt` is required", { status: 400 });
+  // F2/M2: Validate field types and enforce size caps before touching any value
+  const parsed = GenerateBodySchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return new Response("Invalid request body", { status: 400 });
   }
+  const { prompt, themeHint, extraGuidance } = parsed.data;
 
   const provider = (process.env.AI_PROVIDER ?? "groq").toLowerCase();
   const userMessage = buildUserMessage(prompt, {
-    themeHint: body.themeHint,
-    extraGuidance: body.extraGuidance,
+    themeHint,
+    extraGuidance,
   });
 
   switch (provider) {
