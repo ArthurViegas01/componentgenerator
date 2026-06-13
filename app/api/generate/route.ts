@@ -13,6 +13,13 @@ interface GenerateBody {
   extraGuidance?: string;
 }
 
+// M1: Only accept requests from the app's own origin.
+// Requests without Origin (curl/server-to-server) are allowed and covered by rate limiting.
+const ALLOWED_ORIGINS = new Set<string>([
+  "https://uicomponentgenerator.netlify.app",
+  ...(process.env.NODE_ENV === "development" ? ["http://localhost:3000"] : []),
+]);
+
 // Rate limiting: active only when Upstash env vars are configured (fail-open otherwise).
 // Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in .env.local / Netlify env.
 let _rlPerIp: Ratelimit | null = null;
@@ -54,6 +61,18 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
  * share a single streaming path for them with different base URLs.
  */
 export async function POST(req: NextRequest) {
+  // M1: Reject Content-Type != application/json (closes the text/plain CORS bypass)
+  const contentType = req.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    return new Response("Unsupported Media Type", { status: 415 });
+  }
+
+  // M1: Reject cross-origin requests from unlisted origins
+  const origin = req.headers.get("origin");
+  if (origin && !ALLOWED_ORIGINS.has(origin)) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
   // F1: Rate limiting (skipped when Upstash is not configured)
   if (_rlPerIp && _rlGlobal && _rlDaily) {
     const ip =

@@ -35,7 +35,10 @@ export function useCodeEditor() {
       try {
         const res = await fetch("/api/generate", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "synth",
+          },
           body: JSON.stringify({ prompt, themeHint: opts?.themeHint }),
           signal: controller.signal,
         });
