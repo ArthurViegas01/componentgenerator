@@ -153,10 +153,8 @@ async function streamFromOpenAICompatible(args: {
   userMessage: string;
 }): Promise<Response> {
   if (!args.apiKey) {
-    return new Response(
-      `Missing ${args.apiKeyEnvName}. Get a free key at https://console.groq.com/keys and set it in .env.local.`,
-      { status: 500 }
-    );
+    console.error(`Missing env var: ${args.apiKeyEnvName}`);
+    return new Response("Service temporarily unavailable", { status: 500 });
   }
 
   const upstream = await fetch(args.baseUrl, {
@@ -179,10 +177,8 @@ async function streamFromOpenAICompatible(args: {
 
   if (!upstream.ok || !upstream.body) {
     const detail = await upstream.text().catch(() => "");
-    return new Response(
-      `Upstream error (${upstream.status}): ${detail || "no body"}`,
-      { status: 502 }
-    );
+    console.error(`Upstream ${upstream.status}:`, detail);
+    return new Response("Generation failed, please try again.", { status: 502 });
   }
 
   const encoder = new TextEncoder();
@@ -243,10 +239,8 @@ async function streamFromOpenAICompatible(args: {
 async function streamFromAnthropic(userMessage: string): Promise<Response> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return new Response(
-      "Missing ANTHROPIC_API_KEY. Set it in .env.local or switch AI_PROVIDER.",
-      { status: 500 }
-    );
+    console.error("Missing env var: ANTHROPIC_API_KEY");
+    return new Response("Service temporarily unavailable", { status: 500 });
   }
 
   const client = new Anthropic({ apiKey });
