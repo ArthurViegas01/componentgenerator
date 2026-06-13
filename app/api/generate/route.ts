@@ -106,6 +106,7 @@ async function streamFromOpenAICompatible(args: {
       model: args.model,
       stream: true,
       temperature: 0.4,
+      max_tokens: 4096,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: args.userMessage },
