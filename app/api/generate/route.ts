@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 import { SYSTEM_PROMPT, buildUserMessage } from "@/lib/ai/prompts";
 
 export const runtime = "nodejs";
@@ -9,6 +11,31 @@ interface GenerateBody {
   prompt: string;
   themeHint?: string;
   extraGuidance?: string;
+}
+
+// Rate limiting: active only when Upstash env vars are configured (fail-open otherwise).
+// Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in .env.local / Netlify env.
+let _rlPerIp: Ratelimit | null = null;
+let _rlGlobal: Ratelimit | null = null;
+let _rlDaily: Ratelimit | null = null;
+
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  const _redis = Redis.fromEnv();
+  _rlPerIp = new Ratelimit({
+    redis: _redis,
+    limiter: Ratelimit.slidingWindow(10, "1 m"),
+    prefix: "gen:ip",
+  });
+  _rlGlobal = new Ratelimit({
+    redis: _redis,
+    limiter: Ratelimit.slidingWindow(300, "1 h"),
+    prefix: "gen:global",
+  });
+  _rlDaily = new Ratelimit({
+    redis: _redis,
+    limiter: Ratelimit.slidingWindow(2000, "24 h"),
+    prefix: "gen:daily",
+  });
 }
 
 /**
@@ -27,6 +54,20 @@ interface GenerateBody {
  * share a single streaming path for them with different base URLs.
  */
 export async function POST(req: NextRequest) {
+  // F1: Rate limiting (skipped when Upstash is not configured)
+  if (_rlPerIp && _rlGlobal && _rlDaily) {
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+    const [a, b, c] = await Promise.all([
+      _rlPerIp.limit(ip),
+      _rlGlobal.limit("all"),
+      _rlDaily.limit("all"),
+    ]);
+    if (!a.success || !b.success || !c.success) {
+      return new Response("Rate limit exceeded", { status: 429 });
+    }
+  }
+
   let body: GenerateBody;
   try {
     body = await req.json();
