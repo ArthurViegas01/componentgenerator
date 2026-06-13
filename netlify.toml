@@ -13,3 +13,16 @@
 # enables streaming responses, SSR, and ISR on Netlify's platform.
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# F3: Security headers for all routes.
+# CSP: script-src includes unpkg.com and cdn.tailwindcss.com because the
+# preview iframe (srcDoc) inherits the parent CSP — those CDNs load
+# Babel Standalone, React, and Tailwind inside the sandbox.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'"
