@@ -271,9 +271,16 @@ function buildSandboxHtml(args: {
     },
   };
 </script>
-<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<!-- CDN scripts com versao fixada (F4): evita o salto silencioso de major.
+     @babel/standalone antes vinha sem versao alguma e poderia migrar sozinho
+     para uma major futura; agora fica preso na linha 7.x. Mantidos no unpkg
+     para casar com a allowlist de script-src da CSP (netlify.toml). SRI/self-host
+     ficam como residuo aceito: o preview roda em iframe sandbox de origem opaca
+     (sem DOM pai/cookies), o que contem o raio de impacto, e o Tailwind Play CDN
+     nao suporta versionamento/SRI por design. -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js" crossorigin></script>
 <script src="https://unpkg.com/framer-motion@11/dist/framer-motion.js" crossorigin></script>
 <script src="https://unpkg.com/lucide-react@0.453.0/dist/umd/lucide-react.js" crossorigin></script>
 <style>
