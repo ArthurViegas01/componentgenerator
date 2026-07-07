@@ -11,7 +11,7 @@ Real-time React component generator. Describe a component in plain text; watch t
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 16 (App Router, Node.js runtime) |
+| Framework | Next.js 15 (App Router, Node.js runtime) |
 | LLM | Groq / Llama 3.3 70B (default, free) · Ollama · Anthropic Claude · OpenAI |
 | Editor | Monaco Editor (dynamically imported, SSR disabled) |
 | In-browser compiler | Babel Standalone (CDN, loaded inside the iframe) |
